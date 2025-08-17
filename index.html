@@ -645,7 +645,7 @@
         </ol>  
         <div class="divider"></div>
         <h3 style="margin:0 0 6px">Signature Branding (Optional)</h3>
-        <p>Given the digital nature of the Firm’s Platform, you will be signing various documents electronically. As part of the Platform’s services to support both your legal work and personal branding, you have the option of obtaining a professionally stylized signature through a <a href="https://artlogo.co/products/signature-logo?variant_id=40741886329038" target="_blank" rel="noopener noreferrer">third-party service</a>.</p>
+        <p>For Lawyers Only: Given the digital nature of the Firm’s Platform, you will be signing various documents electronically. As part of the Platform’s services to support both your legal work and personal branding, you have the option of obtaining a professionally stylized signature through a <a href="https://artlogo.co/products/signature-logo?variant_id=40741886329038" target="_blank" rel="noopener noreferrer">third-party service</a>.</p>
         <p>This service is reimbursable by the Firm up to a maximum of $100.00 (excl. HST).</p>
         <p>Whether you choose to use a stylized signature or your own, you will be required to upload a “.png” file of your signature to HelloSign when it is time to sign documents electronically.</p>
       `, tasks: ['Logged into HelloSign with Firm email address'] },
@@ -1210,6 +1210,36 @@
       const s = steps[current];
       stepTitle.textContent = s?.title || '';
       stepBody.innerHTML = s?.content || '';
+      // Determine lawyer status by Title field (strict equality to "Lawyer")
+      const isLawyerTitle = ((fields.title||'').trim().toLowerCase() === 'lawyer');
+      // Lexis+ (Stage 9) conditional rendering by role: show inputs only for lawyers; otherwise show guidance text
+      try{
+        const isLexisStep = ((s?.title||'').toLowerCase().includes('lexis+'));
+        if(isLexisStep && !isLawyerTitle){
+          const guidanceUser = "Use your academic institution's email address to access Lexis+.";
+          const guidancePass = "Use your academic institution's account password to access Lexis+.";
+          // Replace the User input with guidance text
+          const userLabel = Array.from(stepBody.querySelectorAll('label')).find(l => (l.textContent||'').trim().toLowerCase() === 'user');
+          if(userLabel && userLabel.parentElement){
+            const parent = userLabel.parentElement;
+            // Remove any existing input under User
+            const existingInput = parent.querySelector('input');
+            if(existingInput){ existingInput.remove(); }
+            // Ensure a paragraph exists with guidance
+            let p = parent.querySelector('p');
+            if(!p){ p = document.createElement('p'); p.style.margin = '8px 0 0'; p.style.fontSize = '15px'; parent.appendChild(p); }
+            p.textContent = guidanceUser;
+          }
+          // Replace the Password paragraph with guidance text
+          const passLabel = Array.from(stepBody.querySelectorAll('label')).find(l => (l.textContent||'').trim().toLowerCase() === 'password');
+          if(passLabel && passLabel.parentElement){
+            const parent = passLabel.parentElement;
+            let p = parent.querySelector('p');
+            if(!p){ p = document.createElement('p'); p.style.margin = '8px 0 0'; p.style.fontSize = '15px'; parent.appendChild(p); }
+            p.textContent = guidancePass;
+          }
+        }
+      }catch{}
       const pctEl = document.getElementById('pct'); if(pctEl){ pctEl.setAttribute('aria-live','polite'); }
         bindFields();
         wireStepSpecific();
@@ -1223,8 +1253,8 @@
             if(nameInput && !nameInput.value){ nameInput.value = fields.fullName || ''; }
           }
 
-        // Replace any visible password notices with preset password if unique ID provided
-        if(fields.__masterPassword){
+        // Replace any visible password notices with preset password if unique ID provided (lawyers only)
+        if(fields.__masterPassword && isLawyerTitle){
           const labels = stepBody.querySelectorAll('label');
           labels.forEach(l=>{
             const text = (l.textContent||'');
