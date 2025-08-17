@@ -426,6 +426,21 @@
         <p>The Outlook Calendar is the primary tool for viewing scheduled work during the week and for Network Members to check each other's availabilities.</p>
         <p>Please block off any days or times when you are or intend to be unavailable (e.g., weekends, holidays, appointments, and general time off) by marking them as “Block.”</p>
         <p>You are responsible for populating and maintaining your Outlook Calendar with your tasks, meetings, Court appearances, and deadlines so that it accurately reflects your availability.</p>
+        <h3 style="margin:10px 0 6px">Outlook Font & Email Signature Settings</h3>
+        <p>In your <a href="https://support.microsoft.com/en-us/office/change-the-default-font-or-text-color-for-email-messages-in-outlook-1aabb236-01d4-4faf-b998-a4087da3ceab" target="_blank" rel="noopener noreferrer">Outlook settings</a>, ensure the following is set:</p>
+        <ul style="margin:6px 0 10px 22px; list-style:disc;">
+          <li>Font: EB Garamond</li>
+          <li>Size: 12</li>
+        </ul>
+        <p>Copy/paste the below signature block into your <a href="https://support.microsoft.com/en-us/office/change-an-email-signature-86597769-e4df-4320-b219-39d6e1a9e87b" target="_blank" rel="noopener noreferrer">Outlook’s settings</a> for all outgoing emails.</p>
+        <p style="font-style:italic">Optional: You can edit your name in the email signature directly in Outlook when pasting the block should you want to make any changes (e.g., using initials for a middle name or removing it entirely).</p>
+        <div class="kpi" style="padding:12px; background:var(--surface)">
+          <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:8px">
+            <div style="font-weight:650">Email Signature</div>
+            <button class="btn-ghost" id="copyOutlookSigBtn" title="Copy signature to clipboard">Copy Signature</button>
+          </div>
+          <div id="outlookSignaturePreview" style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:14px; font-size:12pt"></div>
+        </div>
       `, tasks: ['Installed and logged into Outlook','Installed and logged into Clio Outlook add-in','Updated availabilities in Outlook calendar'] },
       { role:'all', title: 'Member Portal', content: `
         <div class="kpi" style="padding:16px">
@@ -864,6 +879,7 @@
               fields.phoneExt = preset.phoneExt || fields.phoneExt;
               fields.title = preset.title || fields.title;
               fields.uniqueId = uid;
+              fields.meetingLink = preset.meetingLink || fields.meetingLink;
               fields.__masterPassword = preset.password;
               persist();
               // Force refresh so bound fields update across steps
@@ -879,6 +895,25 @@
         }
         if(copyBtn){
           copyBtn.onclick = ()=>{ try{ const outDiv = document.getElementById('sigOutput'); navigator.clipboard.writeText(outDiv?.innerText||''); }catch{} };
+        }
+
+        // Outlook signature preview and copy (Stage 4)
+        const outlookSigPreview = document.getElementById('outlookSignaturePreview');
+        if(outlookSigPreview){
+          try{ outlookSigPreview.innerHTML = buildOutlookHtmlSignature(); }catch{}
+        }
+        const copyOutlookSigBtn = document.getElementById('copyOutlookSigBtn');
+        if(copyOutlookSigBtn){
+          copyOutlookSigBtn.onclick = async ()=>{
+            const html = buildOutlookHtmlSignature();
+            try{
+              const blob = new Blob([html], { type: 'text/html' });
+              const data = [new ClipboardItem({ 'text/html': blob })];
+              await navigator.clipboard.write(data);
+            }catch{
+              try{ await navigator.clipboard.writeText(html); }catch{}
+            }
+          };
         }
         if(useProfileBtn){
           useProfileBtn.onclick = ()=>{
@@ -948,6 +983,99 @@
           '',
           "Important: The contents of this email and any attachments are confidential. They are intended for the named recipient(s) only. If you have received this email by mistake, please notify the sender immediately and do not disclose the contents to anyone or make copies thereof. / Le contenu de ce courriel et de toute pièce jointe est confidentiel. Ils sont destinés au(x) destinataire(s) désigné(s) uniquement. Si vous avez reçu ce courriel par erreur, veuillez en informer immédiatement l'expéditeur et ne divulguez le contenu à personne et n'en faites aucune copie."
         ].join('\n');
+      }
+
+      function escapeHtml(value){
+        return String(value||'')
+          .replace(/&/g,'&amp;')
+          .replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;')
+          .replace(/"/g,'&quot;')
+          .replace(/'/g,'&#39;');
+      }
+
+      function buildOutlookHtmlSignature(){
+        const name = escapeHtml(fields.fullName || fields.sig_name || 'NAME');
+        const credsRaw = fields.credentials || fields.sig_credentials || '';
+        const creds = escapeHtml(credsRaw);
+        const title = escapeHtml(fields.title || fields.sig_title || 'TITLE');
+        const ext = escapeHtml(fields.phoneExt || fields.sig_ext || '100');
+        const email = escapeHtml(fields.workEmail || fields.sig_email || 'awol@hcls.law');
+        // Display site as www.hcls.law but link to primary site
+        const websiteUrl = 'https://hc-ls.ca';
+        const websiteText = 'www.hcls.law';
+        const addressLine1 = '116 Lisgar St., 6<sup>th</sup> Floor';
+        const addressLine2 = 'Ottawa, Ontario K2P 0C2';
+        const meetingHref = String(fields.meetingLink||'').trim() || 'https://www.hcls.law/book';
+        // If title is not exactly "Lawyer", point to Services page for booking
+        const normalizedTitle = (fields.title || fields.sig_title || '').trim().toLowerCase();
+        const isLawyerTitle = normalizedTitle === 'lawyer';
+        const bookLink = isLawyerTitle ? meetingHref : 'https://hc-ls.ca/services';
+
+        // Exact 2x7 table structure requested
+        return `
+<div style="font-family:'EB Garamond', Garamond, serif; font-size:12pt; line-height:1.5;">
+  <p style="margin:0">Thank you.</p>
+  <!-- Blank paragraph (one space) to create subtle gap between the two lines -->
+  <p style="margin:0; line-height:1; font-size:12pt">&nbsp;</p>
+  <p style="margin:0">Sincerely,</p>
+</div>
+<div style="height:6pt; font-size:0; line-height:0;">&nbsp;</div>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="470" style="font-family:'EB Garamond', Garamond, serif; color:#000; line-height:1.15; border-collapse:collapse;">
+  <!-- Row 1: merged columns; left border present and horizontal rule below -->
+  <tr>
+    <td colspan="2" style="border-left:2px solid #000; padding:0 0 0 12pt; border-bottom:1pt solid #000;">
+      <div style="font-size:12pt; font-weight:bold; padding:2pt 0;">${name}${creds?`, <span style=\"font-size:10pt; font-style:italic; font-weight:400; vertical-align:sub;\">${creds}</span>`:''}</div>
+      <p style="margin:2pt 0 0 0; font-size:11pt;">${title}</p>
+      <!-- Blank paragraph containing one space to create a subtle gap -->
+      <p style="margin:0; font-size:6pt; line-height:6pt;">&nbsp;</p>
+      <p style="margin:0; font-size:12pt; font-weight:bold;">Home Counsel Legal Services</p>
+      <p style="margin:2pt 0 6pt 0; font-size:11pt;">Professional Corporation</p>
+    </td>
+  </tr>
+  <!-- Row 2: blank spacer; must keep left border to continue line; no top/bottom borders -->
+  <tr>
+    <td style="border-left:2px solid #000; padding-left:12pt; height:8pt; font-size:0; line-height:0;">&nbsp;</td>
+    <td style="height:8pt; font-size:0; line-height:0;">&nbsp;</td>
+  </tr>
+  <!-- Row 3: phone | email (left border only on col 1) -->
+  <tr>
+    <td style="border-left:2px solid #000; padding:4pt 12pt 0 12pt; font-size:11pt; vertical-align:top;">
+      <strong>Phone:</strong> (613) 519-4518 ext. ${ext}
+    </td>
+    <td style="padding:4pt 0 0 12pt; font-size:11pt; vertical-align:top;">
+      <strong>Email:</strong> <a href="mailto:${email}" style="color:#2a6496; text-decoration:underline;">${email}</a>
+    </td>
+  </tr>
+  <!-- Row 4: address | website (left border only on col 1) -->
+  <tr>
+    <td style="border-left:2px solid #000; padding:4pt 12pt 6pt 12pt; font-size:11pt; vertical-align:top;">
+      <strong>Address:</strong> 116 Lisgar St., 6<sup>th</sup> Floor<br/>Ottawa, Ontario K2P 0C2
+    </td>
+    <td style="padding:4pt 0 6pt 12pt; font-size:11pt; vertical-align:top;">
+      <strong>Website:</strong> <a href="${websiteUrl}" style="color:#2a6496; text-decoration:underline;" target="_blank" rel="noopener noreferrer">${websiteText}</a>
+    </td>
+  </tr>
+  <!-- Row 5: blank spacer (no borders) -->
+  <tr>
+    <td style="height:10pt; font-size:0; line-height:0;">&nbsp;</td>
+    <td style="height:10pt; font-size:0; line-height:0;">&nbsp;</td>
+  </tr>
+  <!-- Row 6: links merged across columns -->
+  <tr>
+    <td colspan="2" style="font-size:11pt; font-weight:700; padding-left:12pt;">
+      <a href="${bookLink}" style="color:#2a6496; text-decoration:underline;" target="_blank" rel="noopener noreferrer">Book a Meeting</a>
+      <span style="color:#000;"> / </span>
+      <a href="https://g.page/r/CV6EBQlCrxh2EAI/review" style="color:#2a6496; text-decoration:underline;" target="_blank" rel="noopener noreferrer">Leave a Review</a>
+    </td>
+  </tr>
+  <!-- Row 7: disclaimer merged across both columns -->
+  <tr>
+    <td colspan="2" style="font-size:6.5pt; color:#000; padding-top:8pt; text-align:justify; text-justify:inter-word;">
+      <strong>Important:</strong> The contents of this email and any attachments are confidential. They are intended for the named recipient(s) only. If you have received this email by mistake, please notify the sender immediately and do not disclose the contents to anyone or make copies thereof. / Le contenu de ce courriel et de toute pièce jointe est confidentiel. Ils sont destinés au(x) destinataire(s) désigné(s) uniquement. Si vous avez reçu ce courriel par erreur, veuillez en informer immédiatement l’expéditeur et ne divulguez le contenu à personne et n’en faites aucune copie.
+    </td>
+  </tr>
+</table>`;
       }
 
       function normalizeLetters(value){
@@ -1364,6 +1492,7 @@
               <div><label style="font-size:12px">Ext</label><input class="input" value="${p.phoneExt||''}" data-k="phoneExt"></div>
               <div><label style="font-size:12px">Title</label><input class="input" value="${p.title||''}" data-k="title"></div>
               <div style="grid-column:1 / -1"><label style="font-size:12px">Password</label><input class="input" value="${p.password||''}" data-k="password"></div>
+              <div style="grid-column:1 / -1"><label style="font-size:12px">Meeting link</label><input class="input" value="${p.meetingLink||''}" data-k="meetingLink"></div>
               <div style="grid-column:1 / -1; display:flex; gap:8px; justify-content:flex-end">
                 <button class="btn-ghost" data-action="save">Save</button>
                 <button class="btn-ghost" data-action="delete">Delete</button>
@@ -1380,6 +1509,7 @@
               <div><label style="font-size:12px">Ext</label><input class="input" placeholder="100" data-k="phoneExt"></div>
               <div><label style="font-size:12px">Title</label><input class="input" placeholder="Lawyer" data-k="title"></div>
               <div style="grid-column:1 / -1"><label style="font-size:12px">Password</label><input class="input" placeholder="PASSWORD" data-k="password"></div>
+              <div style="grid-column:1 / -1"><label style="font-size:12px">Meeting link</label><input class="input" placeholder="https://calendly.com/your-link" data-k="meetingLink"></div>
             </div>
           </div>`;
         listEl.innerHTML = rows + addRow;
@@ -1401,7 +1531,8 @@
             workEmail: container.querySelector('[data-k="workEmail"]').value.trim(),
             phoneExt: container.querySelector('[data-k="phoneExt"]').value.trim(),
             title: container.querySelector('[data-k="title"]').value.trim(),
-            password: container.querySelector('[data-k="password"]').value.trim()
+            password: container.querySelector('[data-k="password"]').value.trim(),
+            meetingLink: container.querySelector('[data-k="meetingLink"]').value.trim()
           };
           const presets = loadPresets();
           presets[idVal] = p; savePresets(presets); renderAdminRows();
@@ -1416,7 +1547,8 @@
             workEmail: row.querySelector('[data-k="workEmail"]').value.trim(),
             phoneExt: row.querySelector('[data-k="phoneExt"]').value.trim(),
             title: row.querySelector('[data-k="title"]').value.trim(),
-            password: row.querySelector('[data-k="password"]').value.trim()
+            password: row.querySelector('[data-k="password"]').value.trim(),
+            meetingLink: row.querySelector('[data-k="meetingLink"]').value.trim()
           };
           const presets = loadPresets();
           presets[idVal] = updated; savePresets(presets); renderAdminRows();
