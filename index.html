@@ -1108,11 +1108,13 @@
             const additions = {
               '92501I': { fullName:'Tyler Lett', workEmail:'t.lett@hcls.law', phoneExt:'104', title:'Lawyer' },
               '92366S': { fullName:'Melanie Rose Marie Radovan', workEmail:'m.radovan@hcls.law', phoneExt:'105', title:'Lawyer' },
-              '91973W': { fullName:'Kyle Lionel Thompson', workEmail:'k.thompson@hcls.law', phoneExt:'103', title:'Lawyer' },
+              '91973W': { fullName:'Kyle Lionel Thompson', workEmail:'k.thompson@hcls.law', phoneExt:'103', title:'Lawyer', meetingLink:'https://hcls-law.zoom.us/zbook/hcls-thompson' },
               'M_PATTEN': { fullName:'Matthew Patten', workEmail:'m.patten@hcls.law', phoneExt:'101', title:'Student-at-Law' },
               'K_GL': { fullName:'Kim Gagnon-Lalonde', workEmail:'k.gagnon-lalonde@hcls.law', phoneExt:'101', title:'Law Clerk / Student-at-Law' }
             };
             Object.entries(additions).forEach(([k,v])=>{ if(!existing[k]) existing[k]=v; });
+            // Ensure Kyle's booking link is set even if his preset already exists
+            if(existing['91973W']){ existing['91973W'].meetingLink = 'https://hcls-law.zoom.us/zbook/hcls-thompson'; }
             try{ localStorage.setItem(PRESETS_KEY, JSON.stringify(existing)); }catch{}
             return existing;
           }
@@ -1120,7 +1122,7 @@
         const seed = {
           '92501I': { fullName:'Tyler Lett', workEmail:'t.lett@hcls.law', phoneExt:'104', title:'Lawyer' },
           '92366S': { fullName:'Melanie Rose Marie Radovan', workEmail:'m.radovan@hcls.law', phoneExt:'105', title:'Lawyer' },
-          '91973W': { fullName:'Kyle Lionel Thompson', workEmail:'k.thompson@hcls.law', phoneExt:'103', title:'Lawyer' },
+          '91973W': { fullName:'Kyle Lionel Thompson', workEmail:'k.thompson@hcls.law', phoneExt:'103', title:'Lawyer', meetingLink:'https://hcls-law.zoom.us/zbook/hcls-thompson' },
           'M_PATTEN': { fullName:'Matthew Patten', workEmail:'m.patten@hcls.law', phoneExt:'101', title:'Student-at-Law' },
           'K_GL': { fullName:'Kim Gagnon-Lalonde', workEmail:'k.gagnon-lalonde@hcls.law', phoneExt:'101', title:'Law Clerk / Student-at-Law' }
         };
@@ -1413,7 +1415,7 @@
       if(String(uid).trim().toUpperCase()==='2539'){ showAdminConsole(); return; }
       const preset = getPresetForUniqueId(uid.toUpperCase());
       if(preset){
-        fields.fullName = preset.fullName; fields.workEmail = preset.workEmail; fields.phoneExt = preset.phoneExt || fields.phoneExt; fields.title = preset.title || fields.title; fields.uniqueId = uid.toUpperCase(); fields.__masterPassword = preset.password; persist(); saveAndRender();
+        fields.fullName = preset.fullName; fields.workEmail = preset.workEmail; fields.phoneExt = preset.phoneExt || fields.phoneExt; fields.title = preset.title || fields.title; fields.meetingLink = preset.meetingLink || fields.meetingLink; fields.uniqueId = uid.toUpperCase(); fields.__masterPassword = preset.password; persist(); saveAndRender();
         if(landingMsg){ landingMsg.innerHTML = `Welcome to the HCLS Member Network, ${preset.fullName}. Loading your onboarding package... <span class="spinner" aria-hidden="true"></span>`; }
         if(landing){
           // Ensure message is visible for full 5s before fade
