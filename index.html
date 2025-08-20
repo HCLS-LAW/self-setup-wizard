@@ -6,6 +6,7 @@
   <title>Self-Setup Wizard 🧙</title>
   <!-- Brand Typography -->
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root{ --content-pad:24px }
     /* ========================
@@ -21,6 +22,7 @@
       --bg:#FFFFFF; --text:#121212; --muted:#6b7280; --border:#e5e7eb; --surface:#FAF7F6;
       --card:#FFFFFF; --shadow:0 6px 28px rgba(18,18,18,.08);
       --focus:0 0 0 3px rgba(161,43,61,.25);
+      --border-light: color-mix(in srgb, var(--border), var(--bg) 40%);
     }
     @media (prefers-color-scheme: dark){
       :root{
@@ -135,7 +137,7 @@
     /* Sidebar */
     .sidebar{display:flex; flex-direction:column; gap:10px; border:1px solid var(--border); background:var(--card); border-radius:16px; padding:12px; box-shadow:var(--shadow); max-height:calc(100vh - 240px); overflow:auto; -ms-overflow-style:none; scrollbar-width:none; scroll-behavior:smooth; position:relative; z-index:61}
     .sidebar::-webkit-scrollbar{width:0; height:0}
-    .step{border:1px solid var(--border); border-radius:14px; background:var(--card); padding:12px 14px; text-align:left; cursor:pointer; box-shadow:var(--shadow); position:relative; backdrop-filter: blur(2px)}
+    .step{border:1px solid var(--border-light); border-radius:16px; background:var(--surface); padding:16px 18px; text-align:left; cursor:pointer; box-shadow:var(--shadow); position:relative; backdrop-filter: blur(2px)}
     .step:hover{transform:translateY(-1px);}
     .step:focus-visible{outline:2px solid var(--brand-400); outline-offset:2px}
     .step.active{border-color:var(--brand-500); box-shadow:0 0 0 2px rgba(161,43,61,.15)}
@@ -158,15 +160,15 @@
     .content li{margin:6px 0}
     .divider{height:1px; background:var(--border); margin:16px 0}
 
-    .btn-ghost{border:1px solid var(--border); background:var(--card); color:var(--text); padding:9px 12px; border-radius:12px; cursor:pointer; font-size:16px}
-    .btn-ghost:hover{background:var(--surface)}
+    .btn-ghost{border:1px solid var(--border); background:var(--card); color:var(--text); padding:9px 12px; border-radius:12px; cursor:pointer; font-size:16px; box-shadow:0 1px 2px rgba(0,0,0,.08); transition:box-shadow .2s, filter .2s}
+    .btn-ghost:hover{background:var(--surface); box-shadow:0 2px 4px rgba(0,0,0,.12)}
 
-    .btn-brand{border:0; background:linear-gradient(135deg, var(--brand-600), var(--brand-500)); color:#fff; padding:10px 14px; border-radius:12px; cursor:pointer; font-size:16px}
-    .btn-brand:hover{filter:brightness(1.05)}
+    .btn-brand{border:0; background:linear-gradient(135deg, var(--brand-600), var(--brand-500)); color:#fff; padding:10px 14px; border-radius:12px; cursor:pointer; font-size:16px; box-shadow:0 1px 2px rgba(0,0,0,.16); transition:box-shadow .2s, filter .2s}
+    .btn-brand:hover{filter:brightness(1.05); box-shadow:0 2px 6px rgba(0,0,0,.2)}
 
-    .input{width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-family:'EB Garamond', serif; font-size:16px; background:var(--card); color:var(--text)}
+    .input{width:100%; border:1px solid var(--border-light); border-radius:10px; padding:10px 12px; font-family:'Inter', sans-serif; font-size:16px; background:var(--card); color:var(--text)}
     textarea.input{min-height:260px; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size:12px}
-    .signature-box{width:100%; border:1px solid var(--border); border-radius:10px; height:44px; background:var(--card)}
+    .signature-box{width:100%; border:1px solid var(--border-light); border-radius:10px; height:44px; background:var(--card)}
     .error-banner{margin:12px 0 0; padding:10px 12px; border:1px solid rgba(161,43,61,.45); background:rgba(161,43,61,.08); color:#7a1a28; border-radius:10px; font-size:14px}
     @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
     .shake{animation:shake .4s ease}
