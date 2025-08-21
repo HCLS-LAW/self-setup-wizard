@@ -863,6 +863,26 @@
     const tasksList = document.getElementById('tasksList');
     const backBtn = document.getElementById('backBtn');
     const nextBtn = document.getElementById('nextBtn');
+    // Wrap Next button to host inline warning message beneath it
+    try{
+      const nextBtnWrapper = document.createElement('div');
+      nextBtnWrapper.style.display = 'flex';
+      nextBtnWrapper.style.flexDirection = 'column';
+      nextBtnWrapper.style.alignItems = 'flex-end';
+      const nextParent = nextBtn.parentElement;
+      if(nextParent){
+        nextParent.replaceChild(nextBtnWrapper, nextBtn);
+        nextBtnWrapper.appendChild(nextBtn);
+        const nextWarning = document.createElement('div');
+        nextWarning.id = 'nextWarning';
+        nextWarning.className = 'field-error';
+        nextWarning.style.display = 'none';
+        nextWarning.style.maxWidth = '520px';
+        nextWarning.style.textAlign = 'right';
+        nextWarning.style.marginTop = '6px';
+        nextBtnWrapper.appendChild(nextWarning);
+      }
+    }catch{}
     const bar = document.getElementById('bar');
     const pct = document.getElementById('pct');
     const saveDot = document.getElementById('saveDot');
@@ -1279,6 +1299,38 @@
       }catch{}
     }
 
+    // Inline warning/confirm helpers for Next flow
+    function showNextWarning(text){
+      try{
+        const el = document.getElementById('nextWarning');
+        if(el){ el.innerHTML = text; el.style.display = ''; }
+      }catch{}
+    }
+    function hideNextWarning(){
+      try{
+        const el = document.getElementById('nextWarning');
+        if(el){ el.style.display = 'none'; el.innerHTML = ''; }
+      }catch{}
+    }
+    function enterNextConfirmMode(message){
+      try{
+        nextBtn.textContent = 'Yes, I want to proceed';
+        nextBtn.title = 'Proceed despite outstanding tasks';
+        nextBtn.dataset.confirm = 'true';
+        showNextWarning(message);
+      }catch{}
+    }
+    function resetNextConfirmMode(){
+      try{
+        delete nextBtn.dataset.confirm;
+        // Respect current step context for label
+        const isLast = current === (visibleSteps().length - 1);
+        nextBtn.textContent = isLast ? 'Finish' : 'Next';
+        nextBtn.title = isLast ? 'Finish Onboarding' : 'Next';
+        hideNextWarning();
+      }catch{}
+    }
+
     function updateProgress(){
       const ids = allTaskIds();
       const done = ids.filter(id=>checked[id]).length;
@@ -1470,14 +1522,19 @@
         });
         // Stagger card indices for entrance animation
         [...stepBody.querySelectorAll('.kpi')].forEach((el, i)=> el.style.setProperty('--i', i));
+        // Any change to tasks should reset inline Next confirmation state
+        try{ resetNextConfirmMode(); }catch{}
       }else{
         tasksWrap.style.display = 'none';
+        // If no tasks in this step, ensure confirm state is cleared
+        try{ resetNextConfirmMode(); }catch{}
       }
 
       backBtn.disabled = current===0;
       // Last step: move Finish action to the global button row (outside shaded cards)
       const isLast = current===steps.length-1;
       if(isLast){
+        try{ resetNextConfirmMode(); }catch{}
         // Show global Next button as "Finish"
         nextBtn.style.display = '';
         nextBtn.disabled = false;
@@ -1498,6 +1555,8 @@
         nextBtn.textContent = 'Next';
         nextBtn.title = 'Next';
         nextBtn.onclick = null;
+        // Clear any pending confirm state and inline message when rerendering non-last steps
+        try{ resetNextConfirmMode(); }catch{}
       }
     }
 
@@ -1555,9 +1614,31 @@
     nextBtn.addEventListener('click', ()=>{
       if(current<visibleSteps().length-1){
         if(!validateStep(current)) return;
+        // If there are outstanding tasks in this step, require confirmation before proceeding
+        try{
+          const steps = visibleSteps();
+          const s = steps[current] || {};
+          const stepTasks = (s.tasks||[]);
+          if(stepTasks.length){
+            const outstanding = stepTasks.filter(t=>{
+              const id = slug((s.key||s.title)+'-'+(t.id||t));
+              return !checked[id];
+            });
+            if(outstanding.length > 0 && nextBtn.dataset.confirm !== 'true'){
+              const first = outstanding[0];
+              const txt = (typeof first === 'string') ? first : (first && first.text) ? first.text : '';
+              const safeTxt = escapeHtml(txt);
+              const message = `There remains an outstanding task: "${safeTxt}". <br>Are you sure you want to continue to the next step?<br><br>If you faced a problem in completing this task, it will be addressed during the in-person onboarding session.`;
+              enterNextConfirmMode(message);
+              return;
+            }
+          }
+        }catch{}
         setSaving();
         current++;
         if(current > furthestUnlocked){ furthestUnlocked = current; }
+        // Clear confirm state when moving forward
+        try{ resetNextConfirmMode(); }catch{}
         animateStepChange();
       }
     });
