@@ -120,6 +120,9 @@
     .btn{border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.12); color:#fff; padding:9px 12px; border-radius:12px; cursor:pointer; font-size:14px; backdrop-filter: blur(4px);}
     .btn:hover{background:rgba(255,255,255,.18)}
     .btn:focus{outline:none; box-shadow:var(--focus)}
+    /* Button press micro delay */
+    .btn, .btn-ghost, .btn-brand{transition:transform .08s ease}
+    .btn:active, .btn-ghost:active, .btn-brand:active{transform:scale(.98)}
 
     /* Removed role/theme toggles */
 
@@ -133,6 +136,11 @@
     .kpi .label{display:flex; justify-content:space-between; font-size:14px; color:var(--muted); margin-bottom:8px}
     .progress{height:10px; background:var(--surface); border:1px solid var(--border); border-radius:999px; overflow:hidden}
     .bar{height:100%; background:linear-gradient(90deg, var(--brand-600), var(--brand-500)); width:0; transition:width .25s ease}
+    /* Progress shimmer on increase */
+    .progress{position:relative}
+    .bar{position:relative}
+    .bar.shimmer::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); transform:translateX(-100%); animation:sh .6s ease}
+    @keyframes sh{to{transform:translateX(100%)}}
 
     /* Sidebar */
     .sidebar{display:flex; flex-direction:column; gap:10px; border:1px solid var(--border); background:var(--card); border-radius:16px; padding:12px; box-shadow:var(--shadow); max-height:calc(100vh - 240px); overflow:auto; -ms-overflow-style:none; scrollbar-width:none; scroll-behavior:smooth; position:relative; z-index:61}
@@ -155,10 +163,47 @@
     /* Content card */
     .content{border:1px solid var(--border); background:var(--card); border-radius:18px; padding:var(--content-pad); box-shadow:var(--shadow); backdrop-filter: blur(2px)}
     .content h2{margin:0; font-size:22px}
+    /* Step title reveal */
+    @keyframes titleIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
+    .content h2.reveal{animation:titleIn .28s ease}
     .content p{margin:8px 0 16px; line-height:1.6; font-size:16px}
     .content ul{margin:8px 0 16px 22px; font-size:16px}
     .content li{margin:6px 0}
     .divider{height:1px; background:var(--border); margin:16px 0}
+    /* Divider draw */
+    @keyframes drawLine{from{transform:scaleX(0)} to{transform:scaleX(1)}}
+    .divider.reveal{transform-origin:left; transform:scaleX(0); animation:drawLine .35s ease forwards}
+    /* Card entrance stagger */
+    @keyframes cardIn{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:translateY(0)}}
+    .content .kpi{opacity:0; animation:cardIn .25s ease forwards; animation-delay:calc(var(--i, 0) * 60ms)}
+    /* Checklist micro-pop */
+    @keyframes microPop{50%{transform:scale(1.03)} 100%{transform:scale(1)}}
+    #tasksList span{display:inline-block}
+    #tasksList .pop{animation:microPop .18s ease}
+    
+    /* Add breathing room between information blocks within the main content */
+    .content .kpi{margin:12px 0}
+    .content .kpi:first-child{margin-top:0}
+    .content .kpi:last-child{margin-bottom:0}
+    /* Normalize card backgrounds: info cards white; checklist cards light blue */
+    .content .kpi{background:var(--card) !important}
+    .content .kpi.checklist-card{background:var(--surface) !important}
+    /* Save flash */
+    @keyframes flash{0%,100%{filter:none} 50%{filter:drop-shadow(0 0 6px rgba(103,232,249,.6))}}
+    .save.flash{animation:flash .6s ease}
+    /* Subtle pulse on active step */
+    @keyframes subtlePulse{0%,100%{box-shadow:0 0 0 0 rgba(161,43,61,0)} 50%{box-shadow:0 0 0 2px rgba(161,43,61,.08)}}
+    .step.active{animation:subtlePulse 2.5s ease-in-out infinite}
+    /* Mini confetti removed per UX update */
+    /* Link underline slide */
+    .content a{position:relative; text-decoration:none; color:#2a6496}
+    .content a::after{content:""; position:absolute; left:0; right:0; bottom:-2px; height:2px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform .2s ease}
+    .content a:hover::after{transform:scaleX(1)}
+    /* Toasts */
+    #toastRoot{position:fixed; top:16px; right:16px; z-index:10001; display:flex; flex-direction:column; gap:8px; pointer-events:none}
+    .toast{pointer-events:auto; border:1px solid var(--border); background:var(--card); color:var(--text); padding:10px 12px; border-radius:10px; box-shadow:var(--shadow); font-size:14px; opacity:0; transform:translateY(-6px); animation:toastIn .25s ease forwards}
+    @keyframes toastIn{to{opacity:1; transform:translateY(0)}}
+    @keyframes toastOut{to{opacity:0; transform:translateY(-6px)}}
 
     .btn-ghost{border:1px solid var(--border); background:var(--card); color:var(--text); padding:9px 12px; border-radius:12px; cursor:pointer; font-size:16px; box-shadow:0 1px 2px rgba(0,0,0,.08); transition:box-shadow .2s, filter .2s}
     .btn-ghost:hover{background:var(--surface); box-shadow:0 2px 4px rgba(0,0,0,.12)}
@@ -200,6 +245,13 @@
       .right{width:100%}
       body{background:#fff; color:#000}
       .content{box-shadow:none; border-color:#ddd}
+      /* Ensure animated elements render in print */
+      .content .kpi{opacity:1 !important; animation:none !important; transform:none !important}
+      .content h2.reveal{opacity:1 !important; animation:none !important; transform:none !important}
+      .divider.reveal{transform:none !important; animation:none !important}
+      .step.active{animation:none !important}
+      .bar.shimmer::after{display:none !important}
+      #toastRoot{display:none !important}
       /* Only the grey divider should trigger a new page */
       .print-break-before{break-before:auto; page-break-before:auto}
       .divider.print-break-before{break-before:page; page-break-before:always}
@@ -274,6 +326,7 @@
       <a href="https://hc-ls.ca/member-onboarding" target="_blank" rel="noopener" aria-label="Go to HCLS Member Onboarding">
         <img id="firmLogo" class="firm-logo" alt="HCLS Logo" src="https://i.imghippo.com/files/SdSc7795mI.png" />
       </a>
+      <div id="toastRoot" aria-live="polite" aria-atomic="true"></div>
       <section class="kpi">
         <div class="label">
           <span>Overall completion</span>
@@ -293,7 +346,7 @@
 
             <div id="tasksWrap" style="margin-top:12px; display:none">
               <div style="font-size:15px; font-weight:650; margin-bottom:6px">Mark as completed</div>
-              <div class="kpi" style="padding:12px" id="tasksList"></div>
+              <div class="kpi checklist-card" style="padding:12px" id="tasksList"></div>
             </div>
 
             <div class="row" style="justify-content:space-between; margin-top:16px">
@@ -324,7 +377,7 @@
       'clio-mobile-app': { requiredTasks: ['Installed and logged into Clio mobile app'] },
       'lexis-account': { requiredTasks: ['Logged into Lexis+'] },
       'setting-up-your-zoom-account': { requiredTasks: ['Installed and logged into Zoom app'] },
-      'setting-up-your-chatgpt-account': { requiredTasks: ['Installed ChatGPT Application','I acknowledge the HCLS PII policy for AI tools','I will cross-reference AI outputs with sources','I will reread AI-generated text to ensure intent is maintained'] },
+      'setting-up-your-chatgpt-account': { requiredTasks: ['Installed ChatGPT Application','I acknowledge the HCLS Best Practices for AI tools','I will cross-reference AI outputs with sources','I will reread AI-generated text to ensure intent is maintained'] },
       'reviewing-clio-matters': { requiredInputs: [] },
       'setting-up-your-clio-grow-account': { requiredTasks: ['Logged into Clio Grow account','Registered for Clio Grow training'] },
       'jso-caselines-lao-portals': { requiredTasks: [
@@ -420,21 +473,24 @@
       { role:'all', title: 'Setting Up Your Outlook Email & Calendar', content: `
         <p>Log in to your HCLS Outlook account to access your emails and calendar.</p>
         <p>It is strongly recommended to use the Outlook App for the best experience and not the web browser version.</p>
-        <div class="row" style="gap:12px">
-          <div style="flex:1">
-            <label style="font-size:15px; font-weight:650">Your email</label>
-            <input class="input" data-field="workEmail" placeholder="j.smith@hcls.law" aria-label="Your HCLS work email" readonly>
-          </div>
-          <div style="flex:1">
-            <label style="font-size:15px; font-weight:650">Password</label>
-            <p style="margin:8px 0 0; font-size:15px">Master password has been sent to your personal email. Please update all passwords after logging in.</p>
+        <div class="kpi" style="padding:12px; background:var(--surface)">
+          <div style="font-weight:650; margin-bottom:6px">Credentials</div>
+          <div class="row" style="gap:12px">
+            <div style="flex:1">
+              <label style="font-size:15px; font-weight:650">Your email</label>
+              <input class="input" data-field="workEmail" placeholder="j.smith@hcls.law" aria-label="Your HCLS work email" readonly>
+            </div>
+            <div style="flex:1">
+              <label style="font-size:15px; font-weight:650">Password</label>
+              <p style="margin:8px 0 0; font-size:15px">Master password has been sent to your personal email. Please update all passwords after logging in.</p>
+            </div>
           </div>
         </div>
         <ul>
           <li><a href="https://appsource.microsoft.com/en-us/product/office/WA200003566?tab=Overview" target="_blank" rel="noopener noreferrer">Download the Clio Outlook add-in (Desktop)</a></li>
         </ul>
         <p>The Outlook Calendar is the primary tool for viewing scheduled work during the week and for Network Members to check each other's availabilities.</p>
-        <p>Please block off any days or times when you are or intend to be unavailable (e.g., weekends, holidays, appointments, and general time off) by marking them as “Block.”</p>
+        <p>Please block off any days or times when you are or intend to be unavailable (e.g., weekends, holidays, appointments, and general time off) by marking them as "Block."</p>
         <p>You are responsible for populating and maintaining your Outlook Calendar with your tasks, meetings, Court appearances, and deadlines so that it accurately reflects your availability.</p>
         <h3 style="margin:10px 0 6px">Outlook Font & Email Signature Settings</h3>
         <p>In your <a href="https://support.microsoft.com/en-us/office/change-the-default-font-or-text-color-for-email-messages-in-outlook-1aabb236-01d4-4faf-b998-a4087da3ceab" target="_blank" rel="noopener noreferrer">Outlook settings</a>, ensure the following is set:</p>
@@ -442,7 +498,7 @@
           <li>Font: EB Garamond</li>
           <li>Size: 12</li>
         </ul>
-        <p>Copy/paste the below signature block into your <a href="https://support.microsoft.com/en-us/office/change-an-email-signature-86597769-e4df-4320-b219-39d6e1a9e87b" target="_blank" rel="noopener noreferrer">Outlook’s settings</a> for all outgoing emails.</p>
+        <p>Copy/paste the below signature block into your <a href="https://support.microsoft.com/en-us/office/change-an-email-signature-86597769-e4df-4320-b219-39d6e1a9e87b" target="_blank" rel="noopener noreferrer">Outlook's settings</a> for all outgoing emails.</p>
         <p style="font-style:italic">Optional: You can edit your name in the email signature directly in Outlook when pasting the block should you want to make any changes (e.g., using initials for a middle name or removing it entirely).</p>
         <div class="kpi" style="padding:12px; background:var(--surface)">
           <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:8px">
@@ -456,7 +512,7 @@
         <div class="kpi" style="padding:16px">
           <h3 style="margin:0 0 8px">Account & Access</h3>
           <ul>
-            <li><a href="https://hc-ls.ca/m/login" target="_blank" rel="noopener noreferrer">Sign into</a> your Member Portal on the Firm’s website.</li>
+            <li><a href="https://hc-ls.ca/m/login" target="_blank" rel="noopener noreferrer">Sign into</a> your Member Portal on the Firm's website.</li>
             <li>Use your Firm‑provided email address.</li>
           </ul>
            <div class="divider"></div>
@@ -482,9 +538,9 @@
       { role:'all', title: 'Setting Up Your Clio Manage Account', content: `
         <p><a href="https://account.clio.com/" target="_blank" rel="noopener noreferrer">Log in to your Clio Manage Account</a></p>
         <ul>
-          <li>If you are prompted to select a server, choose “United States/Mexico”.</li>
+          <li>If you are prompted to select a server, choose "United States/Mexico".</li>
           <li>Use your HCLS email</li>
-          <li>Change your password once you’ve logged in for the first time and setup two factor authentication.</li>
+          <li>Change your password once you've logged in for the first time and setup two factor authentication.</li>
         </ul>
         <p><a href="https://help.clio.com/hc/en-us/articles/9031393962395-Set-Up-Clio-Drive" target="_blank" rel="noopener noreferrer">Download Clio Drive / Desktop Launcher</a></p>
         <p>Look around the Clio web app and get a feel for it.</p>
@@ -508,14 +564,17 @@
       `, tasks: ['Installed and logged into Clio mobile app'] },
       { role:'all', title: 'Lexis+ Account', content: `
         <p><a href="https://signin.lexisnexis.com/lnaccess/app/signin?back=https%3A%2F%2Fplus.lexis.com%3A443%2Fca&aci=lpc" target="_blank" rel="noopener noreferrer">Lexis+</a> is the primary legal resource for searching case law and practical guidance, the latter being critically important to your practice.</p>
-        <div class="row" style="gap:12px">
-          <div style="flex:1">
-            <label style="font-size:15px; font-weight:650">User</label>
-            <input class="input" data-field="workEmail" placeholder="j.smith@hcls.law" aria-label="Lexis+ user (HCLS work email)" readonly>
-          </div>
-          <div style="flex:1">
-            <label style="font-size:15px; font-weight:650">Password</label>
-            <p style="margin:8px 0 0; font-size:15px">Master password has been sent to your personal email. Please update all passwords after logging in.</p>
+        <div class="kpi" style="padding:12px; background:var(--surface)">
+          <div style="font-weight:650; margin-bottom:6px">Credentials</div>
+          <div class="row" style="gap:12px">
+            <div style="flex:1">
+              <label style="font-size:15px; font-weight:650">User</label>
+              <input class="input" data-field="workEmail" placeholder="j.smith@hcls.law" aria-label="Lexis+ user (HCLS work email)" readonly>
+            </div>
+            <div style="flex:1">
+              <label style="font-size:15px; font-weight:650">Password</label>
+              <p style="margin:8px 0 0; font-size:15px">Master password has been sent to your personal email. Please update all passwords after logging in.</p>
+            </div>
           </div>
         </div>
       `, tasks: ['Logged into Lexis+'] },
@@ -544,7 +603,7 @@
         <h3 style="margin:0 0 6px">Phone & Video Communications</h3>
         <p>Zoom also serves as the primary telecommunication tool for handling calls with clients and third parties (both audio and video calls).</p>
         <p>After each phone call or Zoom meeting, an AI-generated summary (not a recording or transcript) is produced for internal use only. These summaries are intended to assist with note-taking and to help ensure all information is captured.</p>
-        <p>Zoom AI summaries are not perfect and may contain inconsistencies or inaccuracies. You are responsible for reviewing and revising any summary you use (e.g., when copying and pasting a phone summary into the client’s Clio matter “Notes” tab) to correct any errors.</p>
+        <p>Zoom AI summaries are not perfect and may contain inconsistencies or inaccuracies. You are responsible for reviewing and revising any summary you use (e.g., when copying and pasting a phone summary into the client's Clio matter "Notes" tab) to correct any errors.</p>
         <p>This is not a replacement for personal note-taking—only an additional support.</p>
         <div class="divider"></div>
         <h3 style="margin:0 0 6px">Scheduler</h3>
@@ -562,29 +621,37 @@
           <li><a href="https://apps.apple.com/ca/app/chatgpt/id6448311069" target="_blank" rel="noopener noreferrer">For MacOS</a></li>
           <li><a href="https://apps.microsoft.com/detail/9nt1r1c2hh7j?hl=en-US&gl=US" target="_blank" rel="noopener noreferrer">For Windows</a></li>
         </ul>
-        <div class="row" style="gap:12px">
-          <div style="flex:1">
-            <label style="font-size:15px; font-weight:650">User</label>
-            <input class="input" data-field="workEmail" placeholder="j.smith@hcls.law" aria-label="ChatGPT user (HCLS work email)" readonly>
-          </div>
-          <div style="flex:1">
-            <label style="font-size:15px; font-weight:650">Password</label>
-            <p style="margin:8px 0 0; font-size:15px">Master password has been sent to your personal email. Please update all passwords after logging in.</p>
-          </div>
+
+        <div class="kpi" style="padding:12px; background:var(--surface)">
+          <div style="font-weight:650; margin-bottom:6px">Credentials</div>
+          <p style="margin:4px 0"><strong>User:</strong> gpt@hcls.law</p>
+          <p style="margin:4px 0"><strong>Password:</strong> <a href="https://app.clio.com/nc/#/matters/1585181568/notes" target="_blank" rel="noopener noreferrer">Master Password List for Contractors</a></p>
         </div>
-        <p>You will notice that there is a Custom GPT on the lefthand menu: "Text Polisher"</p>
-        <p><strong><a href="https://chatgpt.com/g/g-YcHoEWPOW-text-polisher" target="_blank" rel="noopener noreferrer">Text Polisher</a></strong> is a custom AI agent that references various sources on effective writing—both general and legal. Simply paste in your text and it will rewrite it in a more polished manner, turning a first draft into a pre-final version. No prompt is required, just copy/paste.</p>
-        <p><strong>DO NOT</strong> insert any Personally Identifiable Information (e.g., full names, addresses, etc.) into ChatGPT. Text should generally refer to parties as “Client,” “Opposing Party,” “Applicant,” “Respondent,” or similar. You can adjust these placeholders in Word afterward using the “Replace All” function.</p>
-        <p><strong>ALWAYS</strong> re-read the provided response to ensure it maintains the intent and meaning of your original text.</p>
-        <p><em>Disclaimer:</em> Do not rely solely on AI agents for information. They are tools to assist—not replace—the “thinking” part of legal work.</p>
-        <p><strong>ALWAYS</strong> cross-reference the output with source materials.</p>
-        <p><em>Rule of Thumb:</em> Always assume AI-generated content is wrong at first glance. This will help you avoid most problems associated with accidental use of “hallucinated” information.</p>
-        <p>When using AI for research: If something seems “too convenient,” it likely is wrong—verify with original sources.</p>
-        <p>When using AI for writing: Reread the generated text to confirm the original intent and meaning are preserved. Minor adjustments are often necessary to ensure accuracy and clarity.</p>
-        `, tasks: ['Installed ChatGPT Application','I acknowledge the HCLS PII policy for AI tools','I will cross-reference AI outputs with sources','I will reread AI-generated text to ensure intent is maintained'] },
+
+        <div class="kpi" style="padding:12px; margin-top:12px">
+          <div style="font-weight:650; margin-bottom:6px">Featured Tool</div>
+          <p style="margin:4px 0"><strong><a href="https://chatgpt.com/g/g-YcHoEWPOW-text-polisher" target="_blank" rel="noopener noreferrer">Text Polisher</a></strong> turns rough drafts into clean, professional prose. Paste your text and it rewrites it into a polished version—no prompt required.</p>
+        </div>
+
+        <div class="kpi" style="padding:12px; margin-top:12px">
+          <div style="font-weight:650; margin-bottom:6px">Best Practices</div>
+          <ul style="margin:6px 0 0 22px">
+            <li><strong>Delete chats after use</strong> to keep the common-use GPT account clean.</li>
+            <li><strong>Do not include PII.</strong> Use placeholders like "Client," "Respondent," etc.</li>
+            <li><strong>Cross‑reference sources.</strong> Always verify the output with original materials.</li>
+            <li><strong>Assume it may be wrong first.</strong> Treat AI text as a draft to be checked.</li>
+            <li><strong>Research caution:</strong> Avoid relying on AI for legal research and don't offload tasks that require "thinking" or "reasoning." Prefer mundane tasks such as rewriting text or finding information in a document.</li>
+          </ul>
+        </div>
+
+        <div class="kpi" style="padding:12px; margin-top:12px">
+          <div style="font-weight:650; margin-bottom:6px">Writing Tip</div>
+          <p style="margin:4px 0">Reread generated text to confirm the original intent and meaning are preserved. Minor edits are often needed for accuracy and clarity.</p>
+        </div>
+        `, tasks: ['Installed ChatGPT Application','I acknowledge the HCLS Best Practices for AI tools','I will cross-reference AI outputs with sources','I will reread AI-generated text to ensure intent is maintained'] },
       { role:'all', title: 'Reviewing Clio Matters', content: `
         <p>You have been provided access to various <a href="https://app.clio.com/nc/#/matters?status=%7B%22value%22:%22Open%22%7D" target="_blank" rel="noopener noreferrer">open matters</a> in Clio Manage.</p>
-        <p>In each matter, review the entries under the “Notes” tab—particularly the Initial Case Consultation (ICC) notes—to gain a general understanding of the case.</p>
+        <p>In each matter, review the entries under the "Notes" tab—particularly the Initial Case Consultation (ICC) notes—to gain a general understanding of the case.</p>
         <p>Many notes will appear to contain duplicate information, as they are structured as follows:</p>
         <div class="kpi" style="padding:12px; background:var(--surface)">
           <div style="font-weight:650">[Notes from meeting rewritten by AI]</div>
@@ -592,13 +659,13 @@
           <div style="font-weight:650">[Notes taken down by host during meeting]</div>
         </div>
         <p>After each client meeting, if a significant number of notes were taken, they are rewritten by AI to produce a cleaner, more structured outline of the discussion.</p>
-        <p>In the “Documents” tab of each matter, you can review related materials. While there is no expectation to read all materials at this time, it is encouraged to review, at a minimum, the “Orders & Endorsements” folder and/or the most recently edited folders to understand the current status of the case.</p>
+        <p>In the "Documents" tab of each matter, you can review related materials. While there is no expectation to read all materials at this time, it is encouraged to review, at a minimum, the "Orders & Endorsements" folder and/or the most recently edited folders to understand the current status of the case.</p>
         <p>You will meet with the Primary Responsible Lawyer to the client to review the matters you will be initially working on.</p>
       `},
       { role:'all', title: 'Setting Up Your Clio Grow Account', content: `
         <p><a href="https://grow.clio.com/home" target="_blank" rel="noopener noreferrer">Log in to your Clio Grow Account</a></p>
         <ul>
-          <li>If you are prompted to select a server, choose “United States/Mexico”.</li>
+          <li>If you are prompted to select a server, choose "United States/Mexico".</li>
           <li>Use your new Firm provided email</li>
           <li>Your password is the same as the one you setup for Clio Manage.</li>
         </ul>
@@ -614,17 +681,23 @@
           <li><a href="https://ontariocourts.casecenter.thomsonreuters.com/Account/logon?returnUrlId=f0a9ff7b2d5c4d168f835d3ae100b38b&IsSecure=yes" target="_blank" rel="noopener noreferrer">For CaseLines</a></li>
           <li><a href="https://www-pa.legalaidonline.on.ca/psp/paprds/SUPPLIER/FIN/c/LA_TSNR2.LA_S_CIVIL_ACCOUNT.GBL?Page=LA_S_CIVIL_ACCOUNT&Action=A&cmd=login&errorCode=105&languageCd=ENG" target="_blank" rel="noopener noreferrer">For LAO</a></li>
         </ul>
-        <p>A masterlist of Network Members' usernames and passwords for the above portals can be found in Clio matter No. 00100, under the "Notes" tab, titled <a href="https://app.clio.com/nc/#/matters/1585181568/notes" target="_blank" rel="noopener noreferrer">“Master Password List for Contractors.”</a></p>
+        <p>A masterlist of Network Members' usernames and passwords for the above portals can be found in Clio matter No. 00100, under the "Notes" tab, titled <a href="https://app.clio.com/nc/#/matters/1585181568/notes" target="_blank" rel="noopener noreferrer">"Master Password List for Contractors."</a></p>
         <p>Do not change any settings on these websites or share the passwords outside Matter 00100. Should you be required to update your own password for one of the above portals, you must also update the master list.</p>
       `, tasks: [
         { id:'jso-cred-saved', text:'I have saved my login credentials in the "Master Password List for Contractors" for LAO, JSO, and CaseLines' },
         { id:'jso-cred-update', text:'I will update my login credentials should I be prompted to change them in the future' }
       ] },
+      { role:'all', title: 'Break & Refresh', content: `
+        <div id="celebrateStep" class="celebrate">
+          <h3>Cheers! 🥂</h3>
+          <p>You've nearly finished the setup&mdash;enjoy a quick break before the final stretch.</p>
+        </div>
+      `},
       { role:'all', title: 'Website Profile (Optional)', content: `
-        <p>You can opt to have your profile displayed on the HCLS website under the “<a href="https://hc-ls.ca/member-network" target="_blank" rel="noopener noreferrer">Member Network</a>” page.</p>
+        <p>You can opt to have your profile displayed on the HCLS website under the "<a href="https://hc-ls.ca/member-network" target="_blank" rel="noopener noreferrer">Member Network</a>" page.</p>
         <p>Should you wish to have a presence there, please draft a brief about yourself (150–250 words) and include any distinctive key points you would like to display.</p>
         <p><strong>Tip:</strong> Upload a copy of your resume to ChatGPT and use the following prompt:</p>
-        <div class="kpi" style="padding:12px; background:var(--surface)">Based on my resume, draft a brief about me in the third person perspective. Highlight my accomplishments and how the skills I’ve acquired tie into a family law firm. 150-250 words.</div>
+        <div class="kpi" style="padding:12px; background:var(--surface)">Based on my resume, draft a brief about me in the third person perspective. Highlight my accomplishments and how the skills I've acquired tie into a family law firm. 150-250 words.</div>
         <p>Edit the prompt and/or the provided answer to your liking before sending it in. You can make use of the Text Polisher agent for this as well.</p>
         <p>This prompt is not required—only a recommendation to get a first draft going.</p>
         <p>Send your brief, as well as a professional photo of yourself, to <a href="mailto:admin@hcls.law" style="text-decoration:underline">admin@hcls.law</a></p>
@@ -643,7 +716,7 @@
         <div class="kpi" style="padding:16px">
           <h3 style="margin:0 0 8px">Create HFI scripts from blog posts</h3>
           <p style="margin:8px 0">You can opt into preparing short, informative videos that expand on the content of HCLS blog articles, offering a more in-depth review of the topics covered. While some videos may eventually be longer, detailed pieces—such as reviews of notable case law—will be introduced at a later stage in the development of Home Field Insights (HFI). At this early stage, the primary focus will be on creating scripts based on current HCLS articles. Once these scripts are completed, a proper studio or setup will be arranged for recording purposes.</p>
-          <p style="margin:8px 0">Should you opt in, you're encouraged to make use of AI to assist in drafting scripts. For example, you may prompt the AI to create a promotional video script based on an article and then refine the draft to ensure it fits the desired tone and style. The Firm’s YouTube channel, Home Field Insights, is aimed at the general public, clients, and students. Although the Firm’s webpage is not yet public, the vision for HFI is clear: the videos should match the quality of later LegalEagle productions, including a plug for retaining HCLS to assist with files (the “Home Team”). The style should be engaging and approachable rather than corporate or lecture-like, adding a personal “vibe” to the discussion of legal topics. </p>
+          <p style="margin:8px 0">Should you opt in, you're encouraged to make use of AI to assist in drafting scripts. For example, you may prompt the AI to create a promotional video script based on an article and then refine the draft to ensure it fits the desired tone and style. The Firm's YouTube channel, Home Field Insights, is aimed at the general public, clients, and students. Although the Firm's webpage is not yet public, the vision for HFI is clear: the videos should match the quality of later LegalEagle productions, including a plug for retaining HCLS to assist with files ("Home Team"). The style should be engaging and approachable rather than corporate or lecture-like, adding a personal "vibe" to the discussion of legal topics. </p>
           <p style="margin:8px 0">Scripts to be submitted alongside any invoice for review and approval. For lawyers, each approved script will provide an additional allowance bump of 1% to your next invoice (maximum of +2% per invoice). Rates for filming, editing, and posting video content for the Firm will be discussed on a case-by-case basis.</p>
         </div>
       ` },
@@ -655,9 +728,9 @@
         </ol>  
         <div class="divider"></div>
         <h3 style="margin:0 0 6px">Signature Branding (Optional)</h3>
-        <p>For Lawyers Only: Given the digital nature of the Firm’s Platform, you will be signing various documents electronically. As part of the Platform’s services to support both your legal work and personal branding, you have the option of obtaining a professionally stylized signature through a <a href="https://artlogo.co/products/signature-logo?variant_id=40741886329038" target="_blank" rel="noopener noreferrer">third-party service</a>.</p>
+        <p>For Lawyers Only: Given the digital nature of the Firm's Platform, you will be signing various documents electronically. As part of the Platform's services to support both your legal work and personal branding, you have the option of obtaining a professionally stylized signature through a <a href="https://artlogo.co/products/signature-logo?variant_id=40741886329038" target="_blank" rel="noopener noreferrer">third-party service</a>.</p>
         <p>This service is reimbursable by the Firm up to a maximum of $100.00 (excl. HST).</p>
-        <p>Whether you choose to use a stylized signature or your own, you will be required to upload a “.png” file of your signature to HelloSign when it is time to sign documents electronically.</p>
+        <p>Whether you choose to use a stylized signature or your own, you will be required to upload a ".png" file of your signature to HelloSign when it is time to sign documents electronically.</p>
       `, tasks: ['Logged into HelloSign with Firm email address'] },
       { role:'all', title: 'Security & Confidentiality Guidelines', content: `
         <p><strong>Store Passwords Securely:</strong> All passwords must be stored in a secure, encrypted password manager (e.g., 1Password, LastPass, Bitwarden) rather than written down, saved in unencrypted files, or stored in browsers without encryption. Use unique, complex passwords for each account, and enable multi-factor authentication (MFA) whenever possible. Passwords should never be shared verbally, over unsecured channels, or stored in any location accessible to unauthorized individuals.</p>
@@ -670,12 +743,6 @@
         'I will not discuss case details outside authorized channels',
         'I will not store sensitive information in AI tools'
       ]},
-      { role:'all', title: 'Refresh & Celebrate', content: `
-        <div id="celebrateStep" class="celebrate">
-          <h3>Cheers! 🥂</h3>
-          <p>You\'ve nearly finished the setup&mdash;enjoy a quick drink before the final stretch.</p>
-        </div>
-      `},
       { role:'all', title: 'HST Registration', content: `
         <p><strong>HCLS does not provide tax advice. You are recommended to seek guidance from a qualified tax service or professional for additional answers to tax questions.</strong></p>
         <p>This general guide is intended to provide you with an initial walkthrough of registering for a GST/HST number with the Canada Revenue Agency (CRA). You can register online and receive your number immediately.</p>
@@ -692,14 +759,14 @@
               </ul>
             </li>
             <li>
-              Register online (preferred): Use CRA’s Business Registration Online (BRO): <a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/registering-your-business/bro-register.html" target="_blank" rel="noopener noreferrer">Register now</a>. In one session you can obtain a 9‑digit Business Number (BN) and add a GST/HST (RT) program account.
+              Register online (preferred): Use CRA's Business Registration Online (BRO): <a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/registering-your-business/bro-register.html" target="_blank" rel="noopener noreferrer">Register now</a>. In one session you can obtain a 9‑digit Business Number (BN) and add a GST/HST (RT) program account.
               <ol style="margin:8px 0 0 18px">
-                <li>Access BRO and click “Register now”.</li>
+                <li>Access BRO and click "Register now".</li>
                 <li>Confirm personal information (must match your last personal return).</li>
-                <li>Obtain a BN if you don’t already have one; otherwise add a GST/HST account to the BN.</li>
+                <li>Obtain a BN if you don't already have one; otherwise add a GST/HST account to the BN.</li>
                 <li>Select business type (Sole Proprietorship for most individuals; Corporation if incorporated).</li>
                 <li>Add owner information and legal name (corporations: exact registered name).</li>
-                <li>Business activity: enter “Legal services”.</li>
+                <li>Business activity: enter "Legal services".</li>
                 <li>Provide SIN when prompted.</li>
                 <li>Register an RT account; choose effective date and reporting period.</li>
                 <li>Confirm details and note your 15‑digit GST/HST number.</li>
@@ -713,7 +780,7 @@
               </ul>
             </li>
             <li>
-              Record your numbers: Upon approval you’ll receive your BN and the 15‑digit GST/HST account (e.g., 123456789RT0001). Record these for invoicing and filings.
+              Record your numbers: Upon approval you'll receive your BN and the 15‑digit GST/HST account (e.g., 123456789RT0001). Record these for invoicing and filings.
             </li>
             <li>
               Start your obligations:
@@ -745,8 +812,7 @@
         ]},
       { role:'all', title: 'Completion Checklist & Acknowledgment', content: `
         <p>Please return a signed copy of this onboarding guide to <a href="mailto:admin@hcls.law" style="text-decoration:underline">admin@hcls.law</a>, alongside your profile bio and photo (optional).</p>
-        <p>Kindly also confirm that you have created an account on the Firm’s website to be granted access to the Member Portal.</p>
-        <p>A review meeting will be scheduled to go over specifics and address any questions you may have.</p>
+        <p>A review meeting will be scheduled to go over specifics, address any questions you may have, and to assist you with any steps in this onboarding guide you were unable to complete.</p>
         <p>For receiving payments when submitting invoices to HCLS, please confirm the email address at which you wish to receive e‑transfers:</p>
           <input class="input" data-field="etransferEmail" placeholder="______________________________" aria-label="E-transfer email placeholder">
         <div class="divider"></div>
@@ -834,6 +900,7 @@
     const persist = debounce(()=>{
         try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({schemaVersion: SCHEMA_VERSION, checked, current, role, fields, theme, furthestUnlocked})); }catch{}
       saveDot.className='dot saved'; saveText.textContent='Saved';
+      const saveState = document.getElementById('saveState'); if(saveState){ saveState.classList.add('flash'); setTimeout(()=> saveState.classList.remove('flash'), 650); }
     }, 300);
     const setSaving = ()=>{ saveDot.className='dot saving'; saveText.textContent='Saving…'; };
 
@@ -975,6 +1042,38 @@
           }
         }
 
+        // Automatically wrap contiguous non-card content blocks into soft cards
+        // for consistent layout across steps. Existing `.kpi` blocks and `.divider`
+        // boundaries are respected and not re-wrapped.
+        function cardifyStepSections(){
+          try{
+            const root = stepBody;
+            if(!root) return;
+            let el = root.firstElementChild;
+            while(el){
+              const isCard = el.classList && el.classList.contains('kpi');
+              const isDivider = el.classList && el.classList.contains('divider');
+              if(isCard || isDivider){ el = el.nextElementSibling; continue; }
+              const wrapper = document.createElement('div');
+              wrapper.className = 'kpi';
+              wrapper.style.padding = '12px';
+              wrapper.style.background = 'var(--surface)';
+              root.insertBefore(wrapper, el);
+              let movedAny = false;
+              while(wrapper.nextElementSibling){
+                const nxt = wrapper.nextElementSibling;
+                const nxtIsCard = nxt.classList && nxt.classList.contains('kpi');
+                const nxtIsDivider = nxt.classList && nxt.classList.contains('divider');
+                if(nxtIsCard || nxtIsDivider) break;
+                wrapper.appendChild(nxt);
+                movedAny = true;
+              }
+              if(!movedAny){ wrapper.remove(); el = el.nextElementSibling; }
+              else { el = wrapper.nextElementSibling; }
+            }
+          }catch{}
+        }
+
       function buildSignatureBlock(){
         const name = (fields.sig_name||'NAME');
         const creds = (fields.sig_credentials||'Accréditations');
@@ -1103,7 +1202,7 @@
   <!-- Row 7: disclaimer merged across both columns -->
   <tr>
     <td colspan="2" style="font-size:6.5pt; color:#000; padding-top:8pt; text-align:justify; text-justify:inter-word;">
-      <strong>Important:</strong> The contents of this email and any attachments are confidential. They are intended for the named recipient(s) only. If you have received this email by mistake, please notify the sender immediately and do not disclose the contents to anyone or make copies thereof. / Le contenu de ce courriel et de toute pièce jointe est confidentiel. Ils sont destinés au(x) destinataire(s) désigné(s) uniquement. Si vous avez reçu ce courriel par erreur, veuillez en informer immédiatement l’expéditeur et ne divulguez le contenu à personne et n’en faites aucune copie.
+      <strong>Important:</strong> The contents of this email and any attachments are confidential. They are intended for the named recipient(s) only. If you have received this email by mistake, please notify the sender immediately and do not disclose the contents to anyone or make copies thereof. / Le contenu de ce courriel et de toute pièce jointe est confidentiel. Ils sont destinés au(x) destinataire(s) désigné(s) uniquement. Si vous avez reçu ce courriel par erreur, veuillez en informer immédiatement l'expéditeur et ne divulguez le contenu à personne et n'en faites aucune copie.
     </td>
   </tr>
 </table>`;
@@ -1167,11 +1266,29 @@
         return presets[key] || null;
       }
 
+    function showToast(message){
+      try{
+        const root = document.getElementById('toastRoot');
+        if(!root) return;
+        const el = document.createElement('div');
+        el.className = 'toast';
+        el.textContent = message;
+        root.appendChild(el);
+        const close = ()=>{ el.style.animation = 'toastOut .25s ease forwards'; setTimeout(()=> el.remove(), 250); };
+        setTimeout(close, 2400);
+      }catch{}
+    }
+
     function updateProgress(){
       const ids = allTaskIds();
       const done = ids.filter(id=>checked[id]).length;
       const p = ids.length? Math.round(done/ids.length*100) : 0;
+      const prev = Number((pct.textContent||'0').replace(/%/g,''))||0;
       bar.style.width = p + '%'; pct.textContent = p + '%';
+      if(p>prev){ bar.classList.add('shimmer'); setTimeout(()=> bar.classList.remove('shimmer'), 650); }
+      // Milestone toasts
+      const milestones = [25,50,75,100];
+      if(milestones.includes(p) && p>prev){ showToast(p===100 ? 'Onboarding complete! 🎉' : `Nice progress — ${p}% complete`); }
     }
 
     function renderSidebar(){
@@ -1240,6 +1357,7 @@
       const steps = visibleSteps();
       const s = steps[current];
       stepTitle.textContent = s?.title || '';
+      stepTitle.classList.remove('reveal'); void stepTitle.offsetWidth; stepTitle.classList.add('reveal');
       stepBody.innerHTML = s?.content || '';
       // Determine lawyer status by Title field (strict equality to "Lawyer")
       const isLawyerTitle = ((fields.title||'').trim().toLowerCase() === 'lawyer');
@@ -1274,6 +1392,12 @@
       const pctEl = document.getElementById('pct'); if(pctEl){ pctEl.setAttribute('aria-live','polite'); }
         bindFields();
         wireStepSpecific();
+        // Assign stagger indices for card entrance animation
+        try{
+          [...stepBody.querySelectorAll('.kpi')].forEach((el, i)=> el.style.setProperty('--i', i));
+          [...stepBody.querySelectorAll('.divider')].forEach(div => div.classList.add('reveal'));
+        }catch{}
+        cardifyStepSections();
           // Keep profile title synced with selected role when Profile & Role step is displayed
           if((s?.title||'').toLowerCase().includes('profile')){ syncTitleWithRole(); }
           // Auto-fill final stage date & name
@@ -1284,8 +1408,10 @@
             if(nameInput && !nameInput.value){ nameInput.value = fields.fullName || ''; }
           }
 
-        // Replace any visible password notices with preset password if unique ID provided (lawyers only)
-        if(fields.__masterPassword && isLawyerTitle){
+        // Replace any visible password notices with preset password if unique ID provided (lawyers only),
+        // but do not modify the ChatGPT step which now has static credentials.
+        const isChatGPTStep = ((s?.title||'').toLowerCase().includes('chatgpt'));
+        if(fields.__masterPassword && isLawyerTitle && !isChatGPTStep){
           const labels = stepBody.querySelectorAll('label');
           labels.forEach(l=>{
             const text = (l.textContent||'');
@@ -1308,27 +1434,70 @@
           const text = (typeof t==='string')? t : (t.text||'');
           row.innerHTML = `<input type="checkbox" ${checked[id]? 'checked':''} style="margin-top:6px"/> <span>${text}</span>`;
           const box = row.querySelector('input');
-          box.addEventListener('change', ()=>{ setSaving(); checked[id] = !!box.checked; saveAndRender(false); });
+          box.addEventListener('change', ()=>{
+            setSaving();
+            const wasChecked = !!checked[id];
+            checked[id] = !!box.checked;
+            // Trigger micro-pop only for this line's span
+            if(!wasChecked && checked[id]){
+              try{
+                const labelSpan = row.querySelector('span');
+                if(labelSpan){
+                  labelSpan.classList.remove('pop');
+                  void labelSpan.offsetWidth; // reflow to restart animation
+                  labelSpan.classList.add('pop');
+                  setTimeout(()=> labelSpan.classList.remove('pop'), 220);
+                }
+              }catch{}
+            }
+            // Lightweight UI updates to avoid re-rendering the whole step
+            persist();
+            updateProgress();
+            try{
+              const countEl = sidebar.querySelector('.step.active .count');
+              if(countEl){
+                const totalInStep = stepTasks.length;
+                const doneInStep = stepTasks
+                  .map(t => slug((s.key||s.title)+'-'+(t.id||t)))
+                  .filter(tid => checked[tid]).length;
+                countEl.textContent = totalInStep ? `${doneInStep}/${totalInStep}` : '';
+              }
+            }catch{}
+            // Update final checklist only if it's present (last step)
+            try{ renderFinalChecklist(); }catch{}
+          });
           tasksList.appendChild(row);
         });
+        // Stagger card indices for entrance animation
+        [...stepBody.querySelectorAll('.kpi')].forEach((el, i)=> el.style.setProperty('--i', i));
       }else{
         tasksWrap.style.display = 'none';
       }
 
       backBtn.disabled = current===0;
-      // Hide Next button on last step and bind explicit handlers for Finish/Print
+      // Last step: move Finish action to the global button row (outside shaded cards)
       const isLast = current===steps.length-1;
-      nextBtn.style.display = isLast ? 'none' : '';
-      nextBtn.disabled = isLast;
       if(isLast){
-        const finishBtn = document.getElementById('finishBtn');
-        if(finishBtn){
-          finishBtn.addEventListener('click', (e)=>{ e.preventDefault(); try{ showClosingOverlay(); }catch(err){ console.error(err); } }, { once:true });
-        }
+        // Show global Next button as "Finish"
+        nextBtn.style.display = '';
+        nextBtn.disabled = false;
+        nextBtn.textContent = 'Finish';
+        nextBtn.title = 'Finish Onboarding';
+        nextBtn.onclick = (e)=>{ e.preventDefault(); try{ showClosingOverlay(); }catch(err){ console.error(err); } };
+        // Remove in-card Finish button if present (keep Print inside card)
+        const inCardFinish = document.getElementById('finishBtn');
+        if(inCardFinish && inCardFinish.parentElement){ inCardFinish.remove(); }
         const printBtn = document.getElementById('finalPrintBtn');
         if(printBtn){
-          printBtn.addEventListener('click', (e)=>{ e.preventDefault(); handlePrintWithSuggestedFilename(); }, { once:true });
+          printBtn.addEventListener('click', (e)=>{ e.preventDefault(); handlePrintWithSuggestedFilename(); });
         }
+      }else{
+        // Non-last steps: restore global Next button defaults
+        nextBtn.style.display = '';
+        nextBtn.disabled = false;
+        nextBtn.textContent = 'Next';
+        nextBtn.title = 'Next';
+        nextBtn.onclick = null;
       }
     }
 
@@ -1424,18 +1593,6 @@
           el.insertAdjacentElement('afterend', msg);
         }
       });
-      // Tasks
-      if((req.requiredTasks||[]).length){
-        const ids = req.requiredTasks.map(t=> slug((s.key||s.title)+'-'+(t.id||t)));
-        const incomplete = ids.filter(id=> !checked[id]);
-        if(incomplete.length){
-          valid = false;
-          const bannerEl = document.createElement('div');
-          bannerEl.id = 'errorBanner'; bannerEl.className = 'error-banner';
-          bannerEl.textContent = 'Please complete all checklist items for this step before continuing.';
-          document.getElementById('stepBody').prepend(bannerEl);
-        }
-      }
       if(!valid){ const content = document.querySelector('.content'); if(content){ content.classList.remove('shake'); void content.offsetWidth; content.classList.add('shake'); } }
       return valid;
     }
@@ -1500,9 +1657,9 @@
       overlay.className = 'landing fade-in closing-overlay';
       overlay.innerHTML = `
         <div class="panel" style="text-align:center; position:relative">
-          <h1>Welcome to the Home Team</h1>
+          <h1>Welcome to the Home Team Network</h1>
           <p style=\"margin:8px 0\">Next step: <a href=\"mailto:awol@hcls.law?subject=Self-Setup%20complete%20-%20Let%27s%20Meet!&body=Hello%20Alexander%2C%0A%0AI%27ve%20completed%20the%20self-setup%20guide%20and%20would%20like%20to%20schedule%20our%20in-person%20meeting.%20Please%20find%20attached%20a%20signed%20copy%20of%20the%20guide%20for%20reference.%0A%0ALet%20me%20know%20when%20you%27re%20available!\" style=\"color:#fff; text-decoration:underline; font-family: 'EB Garamond', serif\">Schedule a meeting</a> with Alexander W. Ostheimer-Lebeau for an in-person session (approx. 4 hours) to address any questions and to finalize the onboarding process.</p>
-          <p style=\"margin:8px 0\">You’ve completed the self-setup process. You can now close this page.</p>
+          <p style=\"margin:8px 0\">You've completed the self-setup process. You can now close this page.</p>
 
 
           </div>`;
@@ -1667,7 +1824,12 @@
       const restore = ()=>{ document.title = previousTitle; };
       const restoreOnce = ()=>{ window.removeEventListener('afterprint', restoreOnce); restore(); };
       try{ window.addEventListener('afterprint', restoreOnce, { once:true }); }catch{}
-      try{ window.print(); }finally{ setTimeout(restore, 10000); }
+      // Force full render of final checklist before printing
+      try{ renderFinalChecklist(); }catch{}
+      // Give the browser a tick to paint any pending layout before print
+      requestAnimationFrame(()=>{
+        setTimeout(()=>{ try{ window.print(); }finally{ setTimeout(restore, 1000); } }, 50);
+      });
     }
   })();
   </script>
