@@ -260,6 +260,13 @@
       .bg{display:none !important}
       /* Ensure signature box mirrors input field width/height when printing */
       .signature-box{display:block !important; width:100% !important; height:44px !important; border-radius:10px !important}
+
+      /* Print-friendly checklist indicators */
+      #finalChecklist li{position:relative; padding-left:22px; margin:6px 0}
+      #finalChecklist li::before{content:"☐"; position:absolute; left:0; top:0; font-size:14px; line-height:1}
+      #finalChecklist li.done::before{content:"☑"}
+      /* Hide colored dot in print to avoid ambiguity */
+      #finalChecklist li > span{display:none !important}
     }
 
     /* Fullscreen landing overlay */
@@ -1576,6 +1583,7 @@
       items.forEach(it=>{ if(!unique.has(it.text)) unique.set(it.text, it.done); else if(it.done) unique.set(it.text, true); });
       unique.forEach((done, text)=>{
         const li = document.createElement('li');
+        li.className = done ? 'done' : 'todo';
         const color = done? '#10b981' : 'var(--border)';
         li.innerHTML = `<span style="display:inline-block; width:10px; height:10px; background:${color}; border-radius:50%; margin-right:8px"></span>${text}`;
         list.appendChild(li);
