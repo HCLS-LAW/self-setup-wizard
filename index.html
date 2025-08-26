@@ -385,6 +385,7 @@
       'lexis-account': { requiredTasks: ['Logged into Lexis+'] },
       'setting-up-your-zoom-account': { requiredTasks: ['Installed and logged into Zoom app'] },
       'setting-up-your-chatgpt-account': { requiredTasks: ['Installed ChatGPT Application','I acknowledge the HCLS Best Practices for AI tools','I will cross-reference AI outputs with sources','I will reread AI-generated text to ensure intent is maintained'] },
+      'adobe-acrobat-pro-account': { requiredTasks: ['Logged into Adobe Acrobat Pro','Downloaded Adobe Acrobat Pro to desktop'] },
       'reviewing-clio-matters': { requiredInputs: [] },
       'setting-up-your-clio-grow-account': { requiredTasks: ['Logged into Clio Grow account','Registered for Clio Grow training'] },
       'jso-caselines-lao-portals': { requiredTasks: [
@@ -489,7 +490,7 @@
             </div>
             <div style="flex:1">
               <label style="font-size:15px; font-weight:650">Password</label>
-              <p style="margin:8px 0 0; font-size:15px">Master password has been sent to your personal email. Please update all passwords after logging in.</p>
+              <p style="margin:8px 0 0; font-size:15px">Master password can be found in your onboarding package. Please update all passwords after logging in.</p>
             </div>
           </div>
         </div>
@@ -580,7 +581,7 @@
             </div>
             <div style="flex:1">
               <label style="font-size:15px; font-weight:650">Password</label>
-              <p style="margin:8px 0 0; font-size:15px">Master password has been sent to your personal email. Please update all passwords after logging in.</p>
+              <p style="margin:8px 0 0; font-size:15px">Master password can be found in your onboarding package. Please update all passwords after logging in.</p>
             </div>
           </div>
         </div>
@@ -630,7 +631,7 @@
 
         <div class="kpi" style="padding:12px; background:var(--surface)">
           <div style="font-weight:650; margin-bottom:6px">Credentials</div>
-          <p style="margin:4px 0"><strong>User:</strong> gpt@hcls.law</p>
+          <p style="margin:4px 0"><strong>User:</strong> services@hcls.law</p>
           <p style="margin:4px 0"><strong>Password:</strong> <a href="https://app.clio.com/nc/#/matters/1585181568/notes" target="_blank" rel="noopener noreferrer">Master Password List for Contractors</a></p>
         </div>
 
@@ -655,6 +656,22 @@
           <p style="margin:4px 0">Reread generated text to confirm the original intent and meaning are preserved. Minor edits are often needed for accuracy and clarity.</p>
         </div>
         `, tasks: ['Installed ChatGPT Application','I acknowledge the HCLS Best Practices for AI tools','I will cross-reference AI outputs with sources','I will reread AI-generated text to ensure intent is maintained'] },
+      { role:'all', title: 'Adobe Acrobat Pro Account', content: `
+        <p><a href="https://account.adobe.com/" target="_blank" rel="noopener noreferrer">Log in to your Adobe Acrobat Pro Account</a></p>
+        <div class="kpi" id="adobeCredCard" style="padding:12px; background:var(--surface)">
+          <div style="font-weight:650; margin-bottom:6px">Credentials</div>
+          <div class="row" style="gap:12px">
+            <div style="flex:1">
+              <label style="font-size:15px; font-weight:650">User</label>
+              <input class="input" data-field="workEmail" placeholder="j.smith@hcls.law" aria-label="Adobe user (HCLS work email)" readonly>
+            </div>
+            <div style="flex:1">
+              <label style="font-size:15px; font-weight:650">Password</label>
+              <p style="margin:8px 0 0; font-size:15px">Master password can be found in your onboarding package. Please update all passwords after logging in.</p>
+            </div>
+          </div>
+        </div>
+      `, tasks: ['Logged into Adobe Acrobat Pro','Downloaded Adobe Acrobat Pro to desktop'] },
       { role:'all', title: 'Reviewing Clio Matters', content: `
         <p>You have been provided access to various <a href="https://app.clio.com/nc/#/matters?status=%7B%22value%22:%22Open%22%7D" target="_blank" rel="noopener noreferrer">open matters</a> in Clio Manage.</p>
         <p>In each matter, review the entries under the "Notes" tab—particularly the Initial Case Consultation (ICC) notes—to gain a general understanding of the case.</p>
@@ -1011,6 +1028,22 @@
         if(outlookSigPreview){
           try{ outlookSigPreview.innerHTML = buildOutlookHtmlSignature(); }catch{}
         }
+        // Adobe (Stage 12) conditional rendering by role: show student/law clerk shared credentials only for non-lawyers
+        try{
+          const isAdobeStep = ((s?.title||'').toLowerCase().includes('adobe acrobat pro account'));
+          if(isAdobeStep && !isLawyerTitle){
+            const card = document.getElementById('adobeCredCard');
+            if(card && !card.dataset.wired){
+              card.dataset.wired = 'true';
+              card.innerHTML = `
+                <div style="font-weight:650; margin-bottom:6px">Credentials</div>
+                <p style="margin:4px 0"><strong>User:</strong> services@hcls.law</p>
+                <p style="margin:4px 0"><strong>Password:</strong> <a href="https://app.clio.com/nc/#/matters/1585181568/notes" target="_blank" rel="noopener noreferrer">Master Password List for Contractors</a></p>
+                <p style="margin:8px 0 0; font-size:14px; color: var(--muted)">For students/law clerks only. Lawyers must sign in with their provided HCLS email and their own password.</p>
+              `;
+            }
+          }
+        }catch{}
         const copyOutlookSigBtn = document.getElementById('copyOutlookSigBtn');
         if(copyOutlookSigBtn){
           copyOutlookSigBtn.onclick = async ()=>{
@@ -1277,7 +1310,7 @@
         }catch{}
         const seed = {
           '92501I': { fullName:'Tyler Lett', workEmail:'t.lett@hcls.law', phoneExt:'104', title:'Lawyer' },
-          '92366S': { fullName:'Melanie Rose Marie Radovan', workEmail:'m.radovan@hcls.law', phoneExt:'105', title:'Lawyer' },
+          '92366S': { fullName:'Melanie Rose Marie Radovan', workEmail:'m.radovan@hcls.law', phoneExt:'103', title:'Lawyer' },
           '91973W': { fullName:'Kyle Lionel Thompson', workEmail:'k.thompson@hcls.law', phoneExt:'102', title:'Lawyer', meetingLink:'https://hcls-law.zoom.us/zbook/hcls-thompson' },
           'M_PATTEN': { fullName:'Matthew Patten', workEmail:'m.patten@hcls.law', phoneExt:'101', title:'Student-at-Law' },
           'K_GL': { fullName:'Kim Gagnon-Lalonde', workEmail:'k.gagnon-lalonde@hcls.law', phoneExt:'101', title:'Law Clerk / Student-at-Law' }
@@ -1444,6 +1477,20 @@
             let p = parent.querySelector('p');
             if(!p){ p = document.createElement('p'); p.style.margin = '8px 0 0'; p.style.fontSize = '15px'; parent.appendChild(p); }
             p.textContent = guidancePass;
+          }
+        }
+      }catch{}
+      // Adobe (Stage 12) conditional rendering by role: show student/law clerk shared credentials only for non-lawyers
+      try{
+        const isAdobeStep = ((s?.title||'').toLowerCase().includes('adobe acrobat pro account'));
+        if(isAdobeStep && !isLawyerTitle){
+          const card = document.getElementById('adobeCredCard');
+          if(card){
+            card.innerHTML = `
+              <div style="font-weight:650; margin-bottom:6px">Credentials</div>
+              <p style="margin:4px 0"><strong>User:</strong> services@hcls.law</p>
+              <p style="margin:4px 0"><strong>Password:</strong> <a href="https://app.clio.com/nc/#/matters/1585181568/notes" target="_blank" rel="noopener noreferrer">Master Password List for Contractors</a></p>
+            `;
           }
         }
       }catch{}
