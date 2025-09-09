@@ -425,7 +425,7 @@
             <button class="btn-brand" id="applyUniqueBtn">Apply</button>
           </div>
         </div>
-            <p style="font-size:13px; color:var(--muted); margin-top:6px">Test IDs: <code>92501I</code> or <code>92366S</code></p>
+            <p style="font-size:13px; color:var(--muted); margin-top:6px">Test IDs: <code>92501I</code></p>
       `},
       { role:'all', title: 'Getting Started as an HCLS Network Member', content: `
         <p>During your first week, you should focus on:</p>
@@ -1294,23 +1294,31 @@
           const raw = localStorage.getItem(PRESETS_KEY);
           if(raw){
             const existing = JSON.parse(raw)||{};
+            // Remove any existing entries related to Melanie
+            try{
+              if(existing['92366S']){ delete existing['92366S']; }
+              Object.entries(existing).forEach(([k,v])=>{
+                const fullName = String((v&&v.fullName)||'').toLowerCase();
+                const email = String((v&&v.workEmail)||'').toLowerCase();
+                if(fullName.includes('melanie') || email.includes('m.radovan@hcls.law')){ delete existing[k]; }
+              });
+            }catch{}
             const additions = {
-              '92501I': { fullName:'Tyler Lett', workEmail:'t.lett@hcls.law', phoneExt:'104', title:'Lawyer' },
-              '92366S': { fullName:'Melanie Rose Marie Radovan', workEmail:'m.radovan@hcls.law', phoneExt:'105', title:'Lawyer' },
+              '92501I': { fullName:'Tyler Lett', workEmail:'t.lett@hcls.law', phoneExt:'105', title:'Lawyer', meetingLink:'https://hcls-law.zoom.us/zbook/hcls-lett' },
               '91973W': { fullName:'Kyle Lionel Thompson', workEmail:'k.thompson@hcls.law', phoneExt:'102', title:'Lawyer', meetingLink:'https://hcls-law.zoom.us/zbook/hcls-thompson' },
               'M_PATTEN': { fullName:'Matthew Patten', workEmail:'m.patten@hcls.law', phoneExt:'101', title:'Student-at-Law' },
               'K_GL': { fullName:'Kim Gagnon-Lalonde', workEmail:'k.gagnon-lalonde@hcls.law', phoneExt:'101', title:'Law Clerk / Student-at-Law' }
             };
             Object.entries(additions).forEach(([k,v])=>{ if(!existing[k]) existing[k]=v; });
-            // Ensure Kyle's booking link is set even if his preset already exists
+            // Ensure booking links are set even if presets already exist
             if(existing['91973W']){ existing['91973W'].meetingLink = 'https://hcls-law.zoom.us/zbook/hcls-thompson'; }
+            if(existing['92501I']){ existing['92501I'].meetingLink = 'https://hcls-law.zoom.us/zbook/hcls-lett'; }
             try{ localStorage.setItem(PRESETS_KEY, JSON.stringify(existing)); }catch{}
             return existing;
           }
         }catch{}
         const seed = {
-          '92501I': { fullName:'Tyler Lett', workEmail:'t.lett@hcls.law', phoneExt:'104', title:'Lawyer' },
-          '92366S': { fullName:'Melanie Rose Marie Radovan', workEmail:'m.radovan@hcls.law', phoneExt:'103', title:'Lawyer' },
+          '92501I': { fullName:'Tyler Lett', workEmail:'t.lett@hcls.law', phoneExt:'105', title:'Lawyer', meetingLink:'https://hcls-law.zoom.us/zbook/hcls-lett' },
           '91973W': { fullName:'Kyle Lionel Thompson', workEmail:'k.thompson@hcls.law', phoneExt:'102', title:'Lawyer', meetingLink:'https://hcls-law.zoom.us/zbook/hcls-thompson' },
           'M_PATTEN': { fullName:'Matthew Patten', workEmail:'m.patten@hcls.law', phoneExt:'101', title:'Student-at-Law' },
           'K_GL': { fullName:'Kim Gagnon-Lalonde', workEmail:'k.gagnon-lalonde@hcls.law', phoneExt:'101', title:'Law Clerk / Student-at-Law' }
