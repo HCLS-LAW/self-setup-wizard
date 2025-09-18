@@ -103,6 +103,19 @@
       100%{transform:translate(0,0) scale(0.98)}
     }
 
+    @keyframes hcls-shake{
+      0%{transform:translateX(0)}
+      15%{transform:translateX(-8px)}
+      30%{transform:translateX(8px)}
+      45%{transform:translateX(-6px)}
+      60%{transform:translateX(6px)}
+      75%{transform:translateX(-3px)}
+      90%{transform:translateX(3px)}
+      100%{transform:translateX(0)}
+    }
+    .shake{animation:hcls-shake .45s ease-in-out 1}
+    @media (prefers-reduced-motion: reduce){ .shake{animation:none} }
+
     @media (prefers-reduced-motion: reduce){
       .bg .blob{animation:none}
     }
@@ -498,8 +511,9 @@
           <li><a href="https://appsource.microsoft.com/en-us/product/office/WA200003566?tab=Overview" target="_blank" rel="noopener noreferrer">Download the Clio Outlook add-in (Desktop)</a></li>
         </ul>
         <p>The Outlook Calendar is the primary tool for viewing scheduled work during the week and for Network Members to check each other's availabilities.</p>
-        <p>Please block off any days or times when you are or intend to be unavailable (e.g., weekends, holidays, appointments, and general time off) by marking them as "Block."</p>
+        <p>Please block off any days or times when you are or intend to be unavailable (e.g., weekends, holidays, appointments, and general time off).</p>
         <p>You are responsible for populating and maintaining your Outlook Calendar with your tasks, meetings, Court appearances, and deadlines so that it accurately reflects your availability.</p>
+        <p>Make sure to make your Outlook Calendar visible to other Network Members so that they can check your availabilities (either "Can view titles and locations" or "Can view all details"). <a href="https://support.microsoft.com/en-us/office/share-an-outlook-calendar-as-view-only-with-others-353ed2c1-3ec5-449d-8c73-6931a0adab88" target="_blank" rel="noopener noreferrer">How to share your Outlook calendar</a>.</p>
         <h3 style="margin:10px 0 6px">Outlook Font & Email Signature Settings</h3>
         <p>In your <a href="https://support.microsoft.com/en-us/office/change-the-default-font-or-text-color-for-email-messages-in-outlook-1aabb236-01d4-4faf-b998-a4087da3ceab" target="_blank" rel="noopener noreferrer">Outlook settings</a>, ensure the following is set:</p>
         <ul style="margin:6px 0 10px 22px; list-style:disc;">
@@ -515,7 +529,7 @@
           </div>
           <div id="outlookSignaturePreview" style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:14px; font-size:12pt"></div>
         </div>
-      `, tasks: ['Installed and logged into Outlook','Installed and logged into Clio Outlook add-in','Updated availabilities in Outlook calendar'] },
+      `, tasks: ['Installed and logged into Outlook','Installed and logged into Clio Outlook add-in','Updated availabilities in Outlook calendar','Shared Outlook calendar visibility'] },
       { role:'all', title: 'Member Portal', content: `
         <div class="kpi" style="padding:16px">
           <h3 style="margin:0 0 8px">Account & Access</h3>
@@ -555,8 +569,9 @@
         <p><a href="https://help.clio.com/hc/en-us/articles/9290390462875-Navigate-Clio-Manage" target="_blank" rel="noopener noreferrer">Review the Clio Help Center guide to better understand how the system works.</a></p>
         <p><a href="https://www.clio.com/resources/quick-start-sessions/start-using-clio-manage-today/" target="_blank" rel="noopener noreferrer">Register for a 30-minute training session on how to use Clio Manage.</a></p>
         <p><a href="https://help.clio.com/hc/en-us/sections/29657344188187-Clio-Duo" target="_blank" rel="noopener noreferrer">Review the Clio Duo guide to better understand how to use this AI agent.</a></p>
+        <p><a href="https://help.clio.com/hc/en-us/articles/9289960611355-Calendar-Sync-and-Feeds" target="_blank" rel="noopener noreferrer">Sync your Outlook calendar with Clio Manage.</a></p>
         <p>After your training session, we will have an onboarding meeting together to go over the most frequent and useful Clio features that you will be working with.</p>
-      `, tasks: ['Logged into Clio Manage & Updated password','Installed and logged into Clio Drive / Desktop launcher','Registered for Clio Manage training'] },
+      `, tasks: ['Logged into Clio Manage & Updated password','Installed and logged into Clio Drive / Desktop launcher','Registered for Clio Manage training','Synced Outlook calendar with Clio Manage'] },
       { role:'all', title: 'Clio Manage Task List', content: `
         <p>In addition to regular/ongoing client work, you will be assigned tasks through the <a href="https://app.clio.com/nc/#/tasks" target="_blank" rel="noopener noreferrer">Clio Task List</a> (found on left hand side menu in the Clio web app).</p>
         <p>We will have a meeting together to go over the Clio Task List and how tasks will be handled during the onboarding meeting.</p>
@@ -617,12 +632,13 @@
         <h3 style="margin:0 0 6px">Scheduler</h3>
         <p>The Zoom Scheduler allows clients and third parties to book a meeting with you directly—either via videoconference or in person—based on your listed availabilities.</p>
         <p>Because of this, it is especially important to keep your calendar up to date and properly block off times when you are unavailable. This helps prevent unexpected meetings that could take time away from more pressing tasks.</p>
+        <p>Connect your Zoom and Outlook calendars to ensure that your availabilities are accurately reflected in both platforms. <a href="https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0060774" target="_blank" rel="noopener noreferrer">How to connect Outlook Calendar to Zoom</a>.</p>
         <div class="divider"></div>
         <h3 style="margin:0 0 6px">Tech Support</h3>
         <p>Furthermore, for any tech support requests or process-related issues, Zoom allows remote control of your computer. This enables direct assistance if you encounter IT problems.</p>
-        <p>To request IT support, submit a request in the <a href="https://us06web.zoom.us/launch/chat/v2/eyJzaWQiOiIyYzI3MjlhN2UwYTc0Y2EzYTNjNjdkZmMxZWQzNDg1M0Bjb25mZXJlbmNlLnhtcHAuem9vbS51cyJ9" target="_blank" rel="noopener noreferrer">"Tech Support" Zoom channel</a></p>
+        <p>To request IT support, submit a request in the <a href="https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0060774" target="_blank" rel="noopener noreferrer">"Tech Support" Zoom channel</a></p>
         <p>This is not monitoring software and does not permit remote access without your consent.</p>
-      `, tasks: ['Installed and logged into Zoom app'] },
+      `, tasks: ['Installed and logged into Zoom app','Linked Outlook calendar with Zoom Scheduler'] },
       { role:'all', title: 'Setting Up Your ChatGPT Account', content: `
         <p>Download the ChatGPT App (the Web App is not recommended)</p>
         <ul>
